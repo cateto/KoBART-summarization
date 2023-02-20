@@ -41,12 +41,14 @@ tokenizer.decode(summary_ids.squeeze().tolist(), skip_special_tokens=True)
 ```
 ## Requirements
 ```
-pytorch>=1.10.0
-transformers==4.16.2
-pytorch-lightning==1.5.10
-streamlit==1.2.0
+pandas
+torch
+transformers
+pytorch-lightning
+streamlit==1.1.0
+fastparquet
 ```
-## Data
+<!-- ## Data
 - [Dacon 한국어 문서 생성요약 AI 경진대회](https://dacon.io/competitions/official/235673/overview/) 의 학습 데이터를 활용함
 - 학습 데이터에서 임의로 Train / Test 데이터를 생성함
 - 데이터 탐색에 용이하게 tsv 형태로 데이터를 변환함
@@ -60,7 +62,20 @@ streamlit==1.2.0
 | 뉴스원문| 요약문 |  
 
 - 참조 데이터
-  - AIHUB 문서 요약 데이터 (https://aihub.or.kr/aidata/8054)
+  - AIHUB 문서 요약 데이터 (https://aihub.or.kr/aidata/8054) -->
+
+## Data 
+- Lucy 언론 채널 데이터를 활용함
+- 데이터에서 Train / Validation / Test 셋을 주제별로 Stratified 하게 생성함.
+- parquet 형식으로 생성
+- Data 건수
+    - Train Data : 295,749
+    - Validation data : 16,431
+    - Test Data : 16,431
+
+| news  | summary |
+|-------|--------:|
+| 뉴스원문| 요약문 |  
 
 
 ## How to Train
