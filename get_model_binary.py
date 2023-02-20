@@ -1,5 +1,5 @@
 import argparse
-from train import KoBARTConditionalGeneration
+from KoBART-summarization.train import KoBARTConditionalGeneration
 from transformers.models.bart import BartForConditionalGeneration
 import yaml
 

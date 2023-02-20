@@ -1,16 +1,20 @@
 import torch
 import streamlit as st
-from kobart import get_kobart_tokenizer
-from transformers.models.bart import BartForConditionalGeneration
+# from kobart import get_kobart_tokenizer
 
-@st.cache
+from transformers import PreTrainedTokenizerFast
+from transformers import BartForConditionalGeneration
+
+tokenizer = PreTrainedTokenizerFast.from_pretrained('digit82/kobart-summarization')
+
+@st.cache(hash_funcs={torch.nn.parameter.Parameter:lambda _: None})
 def load_model():
     model = BartForConditionalGeneration.from_pretrained('./kobart_summary')
     # tokenizer = get_kobart_tokenizer()
     return model
 
 model = load_model()
-tokenizer = get_kobart_tokenizer()
+# tokenizer = get_kobart_tokenizer()
 st.title("KoBART 요약 Test")
 text = st.text_area("뉴스 입력:")
 

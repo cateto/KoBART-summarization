@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import argparse
 import logging
 import os
@@ -10,6 +11,15 @@ from torch.utils.data import DataLoader, Dataset
 from dataset import KobartSummaryModule
 from transformers import BartForConditionalGeneration, PreTrainedTokenizerFast
 from transformers.optimization import AdamW, get_cosine_schedule_with_warmup
+import wandb
+from pytorch_lightning.loggers import WandbLogger
+
+# wandb setting
+
+wandb.login()
+wandb.init(project=f'lucy_kobart_summarization', sync_tensorboard=True)
+wandb_logger = WandbLogger()
+
 
 parser = argparse.ArgumentParser(description='KoBART Summarization')
 
@@ -27,12 +37,17 @@ class ArgsBase():
             parents=[parent_parser], add_help=False)
         parser.add_argument('--train_file',
                             type=str,
-                            default='data/train.tsv',
+                            default='data/pq/train.gz.parquet',
                             help='train file')
+
+        parser.add_argument('--val_file',
+                            type=str,
+                            default='data/pq/val.gz.parquet',
+                            help='val file')
 
         parser.add_argument('--test_file',
                             type=str,
-                            default='data/test.tsv',
+                            default='data/pq/test.gz.parquet',
                             help='test file')
 
         parser.add_argument('--batch_size',
@@ -163,6 +178,7 @@ if __name__ == '__main__':
     logging.info(args)
 
     dm = KobartSummaryModule(args.train_file,
+                        args.val_file,
                         args.test_file,
                         tokenizer,
                         batch_size=args.batch_size,
@@ -179,7 +195,7 @@ if __name__ == '__main__':
 
     tb_logger = pl_loggers.TensorBoardLogger(os.path.join(args.default_root_dir, 'tb_logs'))
     lr_logger = pl.callbacks.LearningRateMonitor()
-    trainer = pl.Trainer.from_argparse_args(args, logger=tb_logger,
+    trainer = pl.Trainer.from_argparse_args(args, logger=[tb_logger, wandb_logger],
                                             callbacks=[checkpoint_callback, lr_logger])
 
     model = KoBARTConditionalGeneration(args, trainer)

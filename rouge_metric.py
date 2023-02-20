@@ -5,7 +5,7 @@ import itertools
 import collections
 import pkg_resources  # pip install py-rouge
 from io import open
-from konlpy.tag import Mecab
+from kobart import get_kobart_tokenizer
 
 
 
@@ -61,7 +61,7 @@ class Rouge:
 
         self.use_tokenizer = use_tokenizer
         if use_tokenizer:
-            self.tokenizer = Mecab()
+            self.tokenizer = get_kobart_tokenizer()
 
 
         self.apply_avg = apply_avg
@@ -74,7 +74,7 @@ class Rouge:
 
     def tokenize_text(self, text):
         if self.use_tokenizer:
-            return self.tokenizer.morphs(text)
+            return self.tokenizer.tokenize(text)
         else:
             return text
 

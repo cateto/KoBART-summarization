@@ -9,13 +9,14 @@ from tqdm import tqdm, trange
 from torch.utils.data import Dataset, DataLoader
 import pytorch_lightning as pl
 from functools import partial
+import fastparquet
 
 class KoBARTSummaryDataset(Dataset):
     def __init__(self, file, tokenizer, max_len, ignore_index=-100):
         super().__init__()
         self.tokenizer = tokenizer
         self.max_len = max_len
-        self.docs = pd.read_csv(file, sep='\t')
+        self.docs = fastparquet.ParquetFile(file).to_pandas()
         self.len = self.docs.shape[0]
 
         self.pad_index = self.tokenizer.pad_token_id
@@ -60,6 +61,7 @@ class KoBARTSummaryDataset(Dataset):
 
 class KobartSummaryModule(pl.LightningDataModule):
     def __init__(self, train_file,
+                 val_file,
                  test_file, tok,
                  max_len=512,
                  batch_size=8,
@@ -69,6 +71,7 @@ class KobartSummaryModule(pl.LightningDataModule):
         self.max_len = max_len
         self.train_file_path = train_file
         self.test_file_path = test_file
+        self.val_file_path = val_file
         self.tok = tok
         self.num_workers = num_workers
 
@@ -91,6 +94,9 @@ class KobartSummaryModule(pl.LightningDataModule):
         self.test = KoBARTSummaryDataset(self.test_file_path,
                                 self.tok,
                                 self.max_len)
+        self.val = KoBARTSummaryDataset(self.val_file_path,
+                                self.tok,
+                                self.max_len)
 
     def train_dataloader(self):
         train = DataLoader(self.train,
@@ -99,7 +105,7 @@ class KobartSummaryModule(pl.LightningDataModule):
         return train
 
     def val_dataloader(self):
-        val = DataLoader(self.test,
+        val = DataLoader(self.val,
                          batch_size=self.batch_size,
                          num_workers=self.num_workers, shuffle=False)
         return val
